@@ -97,7 +97,7 @@ class StudentController extends Controller
        Session::put('page','exam'); Session::put('subpage','exam');
        $page_info = ['title'=>'Examination Room','icon'=>'pe-7s-notebook','sub-title'=>'Below are papers scheduled for you to take'];
        $schedule = Session::get('schedule');
-       $min = Carbon::now()->addMinutes($schedule->minutes)->addSeconds(5)->toIso8601String();;  // * 60; 
+       $min = Carbon::now()->addMinutes($schedule->minutes)->addSeconds(5)->toIso8601String();  // * 60; 
              //  dd($min); die; 
         return view('front.exams.examroom',compact('page_info','min')); 
         

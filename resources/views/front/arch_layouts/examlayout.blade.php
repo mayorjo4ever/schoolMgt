@@ -68,5 +68,46 @@
                 })();
             </script>
        
+            <script>
+                $(function () {
+
+                    let current = 1;
+                    const total = $('.question').length;
+
+                    // Hide all except first
+                    $('.question').hide();
+                    $('.question[data-index="1"]').show();
+
+                    updateButtons();
+
+                    $('#nextBtn').on('click', function () {
+                        if (current < total) {
+                            current++;
+                            showQuestion();
+                        }
+                    });
+
+                    $('#prevBtn').on('click', function () {
+                        if (current > 1) {
+                            current--;
+                            showQuestion();
+                        }
+                    });
+
+                    function showQuestion() {
+                        $('.question').hide();
+                        $('.question[data-index="' + current + '"]').fadeIn(200);
+                        updateButtons();
+                    }
+
+                    function updateButtons() {
+                        $('#counter').text(`Question ${current} of ${total}`);
+                        $('#prevBtn').prop('disabled', current === 1);
+                        $('#nextBtn').prop('disabled', current === total);
+                    }
+
+                });
+</script>
+
    </body>
 </html>
