@@ -223,7 +223,12 @@ Route::prefix('/portal')->namespace('App\Http\Controllers\Portal')->group(functi
          Route::get('dashboard','StudentController@dashboard');
          Route::get('profile','StudentController@profile');
          Route::match(['get','post'],'course-registration','CourseRegController@start_reg');
-
+         
+         // exam schedules
+         Route::get('exams','StudentController@examSchedules');
+         Route::get('start-exam/{params?}','StudentController@start_exam');
+        Route::match(['get','post'],'examroom','StudentController@examroom');
+          
       });
  });
 

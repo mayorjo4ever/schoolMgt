@@ -44,7 +44,12 @@
                         </i> My Profile
                     </a>
                 </li>  
-              
+               <li>
+                    <a href="{{url('student/exams')}}"  @if(Session::get('subpage')=='exam')  class="mm-active"  @endif >
+                        <i class="metismenu-icon pe-7s-edit">
+                        </i> Exams
+                    </a>
+                </li>
               
                 <li class="app-sidebar__heading"> Registration / Payment </li>  
                 <li>

@@ -693,10 +693,10 @@ $(".confirmDelete").click(function(){
             url:'/admin/get-avail-qtn',
             beforeSend:function(){ l.start(); },
             data:{subject_id:subject_id,paper_type:paper_type},
-            success:function(resp){ stopLoader(btn);
+            success:function(resp){l.stop();  // stopLoader(btn);
                 $('#allqtn').val(resp.value);			 
             }, 
-             error:function(jhx,textStatus,errorThrown){ stopLoader(btn);
+             error:function(jhx,textStatus,errorThrown){ l.stop(); //stopLoader(btn);
              checkStatus(jhx.status); 
              } 
         });

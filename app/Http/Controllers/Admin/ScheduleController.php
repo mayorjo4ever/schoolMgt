@@ -55,62 +55,63 @@ class ScheduleController extends Controller
         
          $users = User::get()->toArray();
          
-         // print "<pre>"; 
+         
          // print_r($schedusers); 
         // print_r($users);  // die;           
         
-//        if($request->isMethod('post')){
-//            $data = $request->all();  # print "<pre>"; 
-//             #print_r($data);           die; 
-//            
-//            //set up rules for validation
-//            $rules = [
-//              'subject'=>'required',
-//              'paper_type'=>'required',
-//              'allqtn'=>'required',
-//              'hours'=>'required',
-//              'minutes'=>'required',
-//              'maxqtn' =>'required|numeric'
-//            ]; 
-//             
-//            $this->validate($request, $rules);
-//            
-//            if($data['maxqtn'] == 0 ||  $data['allqtn'] == 0  || ($data['maxqtn'] >  $data['allqtn']))
-//            {
-//                return redirect()->back()->with('error_message','please check the questions very well, it is not valid');
-//            }
-//            else {
-//            
-//            $schedule->subject_id = $data['subject'];
-//            $schedule->hours = $data['hours'];
-//            $schedule->minutes = $data['minutes'];
-//            $schedule->paper_type = $data['paper_type'];
-//            $schedule->max_qtn = $data['maxqtn'];
-//            $schedule->status = 1;
-//            $schedule->save();
-//            $id = $schedule->id; 
-//            #print "<pre>"; 
-//             ## create their schedule too 
-//            if(isset($data['remove_prev_stud'])){
-//                UsersSchedule::where('schedule_id',$id)->delete(); 
-//                foreach($data['students'] as $user_id){                
-//                    $sched = new UsersSchedule();                        
-//                    $sched->user_id = $user_id;
-//                    $sched->schedule_id = $id;
-//                    $sched->save();                          
-//                } ## end foreach                
-//            }
-//            else {
-//                foreach($data['students'] as $user_id){
-//                    $sched = UsersSchedule::firstOrNew(['schedule_id'=>$id,'user_id'=>$user_id]); 
-//                    $sched->user_id = $user_id;
-//                    $sched->schedule_id = $id;
-//                    $sched->save(); 
-//               } ## end foreach      
-//            }                       
-//            return redirect('admin/schedules')->with('success_message',$message); 
-//            }  // end else - no error
-//        }        
+        if($request->isMethod('post')){
+            $data = $request->all();  # print "<pre>"; 
+//             print "<pre>"; 
+//             print_r($data);           die; 
+            
+            //set up rules for validation
+            $rules = [
+              'subject'=>'required',
+              'paper_type'=>'required',
+              'allqtn'=>'required',
+              'hours'=>'required',
+              'minutes'=>'required',
+              'maxqtn' =>'required|numeric'
+            ]; 
+             
+            $this->validate($request, $rules);
+            
+            if($data['maxqtn'] == 0 ||  $data['allqtn'] == 0  || ($data['maxqtn'] >  $data['allqtn']))
+            {
+                return redirect()->back()->with('error_message','please check the questions very well, it is not valid');
+            }
+            else {
+            
+            $schedule->subject_id = $data['subject'];
+            $schedule->hours = $data['hours'];
+            $schedule->minutes = $data['minutes'];
+            $schedule->paper_type = $data['paper_type'];
+            $schedule->max_qtn = $data['maxqtn'];
+            $schedule->status = 1;
+            $schedule->save();
+            $id = $schedule->id; 
+            #print "<pre>"; 
+             ## create their schedule too 
+            if(isset($data['remove_prev_stud'])){
+                UsersSchedule::where('schedule_id',$id)->delete(); 
+                foreach($data['students'] as $user_id){                
+                    $sched = new UsersSchedule();                        
+                    $sched->user_id = $user_id;
+                    $sched->schedule_id = $id;
+                    $sched->save();                          
+                } ## end foreach                
+            }
+            else {
+                foreach($data['students'] as $user_id){
+                    $sched = UsersSchedule::firstOrNew(['schedule_id'=>$id,'user_id'=>$user_id]); 
+                    $sched->user_id = $user_id;
+                    $sched->schedule_id = $id;
+                    $sched->save(); 
+               } ## end foreach      
+            }                       
+            return redirect('admin/schedules')->with('success_message',$message); 
+            }  // end else - no error
+        }        
         $subjects = Subject::get()->toArray();         
         return view('admin.schedules.add_edit_sched',compact('page_info','btns','subjects','schedule','schedusers','users'));   
     }

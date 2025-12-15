@@ -12,7 +12,14 @@ class Schedule extends Model
     public function users() {
         return $this->hasMany('App\Models\UsersSchedule','schedule_id'); 
     }
-
+    
+    public function user() {
+        return $this->hasOne('App\Models\UsersSchedule','schedule_id'); 
+    }
+    
+    public function subject(){
+       return $this->belongsTo('App\Models\Subject','subject_id'); 
+    }
        
     // public function scheduled() {
     //     return $this->hasMany('App\Models\UsersSchedule','schedule_id'); 
