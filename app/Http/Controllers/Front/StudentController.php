@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Models\Answer;
+use App\Models\ExamQuestion;
 use App\Models\Question;
 use App\Models\Schedule;
 use App\Models\UsersSchedule;
@@ -12,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use function greetings;
+use function now;
 use function redirect;
 use function view;
 
@@ -64,42 +67,112 @@ class StudentController extends Controller
     
     public function start_exam($params=null){
         
-        $infos =  explode("|",base64_decode($params));  #  $params = base64_encode("$user_id|$sched_id|$subj_id|$paper_type");
+        [$userId, $scheduleId, $subjectId, $paperType] =
+            explode('|', base64_decode($params));
+
        #  print "<pre>";                                   #                              0         1           2           3
-         $schedule = Schedule::with('user','subject')->findOrFail($infos[1]);
-            $questions = Question::with('options')
-                    ->where('subject_id',$infos[2]) 
-                    ->where('type',$infos[3])
-                    ->inRandomOrder()->limit($schedule->max_qtn)
-                    ->get();
+        ## $schedule = Schedule::with('user','subject')->findOrFail($infos[1]);
+        ## $schedule = Schedule::with('user', 'subject')->findOrFail($scheduleId);
+        $schedule = Schedule::findOrFail($scheduleId);
+         $userSchedule = UsersSchedule::firstOrCreate(
+            [
+                'user_id' => $userId,
+                'schedule_id' => $scheduleId,
+            ],
+            [
+                'paper_status' => 'normal',
+                'max_score' => $schedule->max_qtn,
+            ]
+        );
+       /** -----------------------------------------
+        * 1️⃣ BLOCK IF COMPLETED
+        * ----------------------------------------*/
+          // Block completed exam
+            if ($userSchedule->paper_status === 'completed'):
+                return redirect('student/exams')
+                    ->with('error_message', 'Paper already completed');
+            endif;
+        
+             // Resume if already started
+            if ($userSchedule->paper_status === 'started'):
+                return redirect('student/boardroom')
+                    ->with('success_message', 'Resuming your exam');
+            endif;
             
-        if(empty(Session::get('questions')) && empty(Session::get('schedule'))):            
-            Session::put('schedule',$schedule);
-            Session::put('questions',$questions);             
-        endif;
-        
-        
-        switch($schedule->user->paper_status):
-            case 'normal':
-            case 'started':                
-                UsersSchedule::where(['user_id'=>$infos[0],'schedule_id'=>$infos[1]])->update(['paper_status'=>'started']);                
-                return redirect('student/examroom')->with('success_message','Your Paper Will Start Now'); break;
-            case 'completed':
-                return redirect('student/exams')->with('error_message','Paper Aleady Completed'); break;
-        endswitch;
-        
-        //print_r(Session::get('schedule')->toarray());
-        // print_r(Session::get('questions')->toarray());
-        # print $infos[2]; print $infos[3];
+            // Start fresh exam
+            $userSchedule->update([
+                'paper_status' => 'started',
+                'started_at'   => now(),
+                'ends_at'      => now()->addMinutes($schedule->minutes)->addSeconds(3),
+            ]);
+           
+            // Attach random questions ONCE
+            $questionIds = Question::where('subject_id', $subjectId)
+                ->where('type', $paperType)
+                ->inRandomOrder()
+                ->limit($schedule->max_qtn)
+                ->pluck('id');
+
+            foreach ($questionIds as $qid) {
+                ExamQuestion::create([
+                    'users_schedule_id' => $userSchedule->id,
+                    'question_id' => $qid
+                ]);
+            } 
+            
+         return redirect('student/boardroom')
+        ->with('success_message', 'Your Paper Will Start Now');
     }
     
     public function examroom(Request $request){
        Session::put('page','exam'); Session::put('subpage','exam');
        $page_info = ['title'=>'Examination Room','icon'=>'pe-7s-notebook','sub-title'=>'Below are papers scheduled for you to take'];
-       $schedule = Session::get('schedule');
-       $min = Carbon::now()->addMinutes($schedule->minutes)->addSeconds(5)->toIso8601String();  // * 60; 
-             //  dd($min); die; 
-        return view('front.exams.examroom',compact('page_info','min')); 
+       $user_id = Auth::guard('student')->user()->id;
+       $userSchedule = UsersSchedule::with('schedule.subject')
+        ->where('user_id', $user_id)
+        ->where('paper_status', 'started')
+        ->firstOrFail();
+      # print "<pre>";
+      # print_r($userSchedule->toarray()); die; 
+      // print_r($user_id); die; 
+       
+        $questions = Question::with('options')
+            ->whereIn(
+                'id',
+                ExamQuestion::where('users_schedule_id', $userSchedule->id)
+                    ->pluck('question_id')
+                )->get();
+
+        // Load saved answers (question_id => option_id)
+        $answers = Answer::where('users_schedule_id', $userSchedule->id)
+            ->pluck('option_id', 'question_id');
+        $min = Carbon::now()->addMinutes($userSchedule->minutes)->addSeconds(3); 
+      # print_r($questions->toarray()); 
+       # print_r($answers->toarray()); die;
+        return view('front.exams.examroom', [
+            'userSchedule' => $userSchedule,
+            'questions'    => $questions,
+            'answers'      => $answers,
+            'min'          => $min 
+        ]);
         
     }
+    
+    public function submit(Request $request)
+    {
+        $userSchedule = UsersSchedule::findOrFail($request->users_schedule_id);
+
+        if ($userSchedule->paper_status === 'completed') return;
+
+        $score = Answer::where('users_schedule_id', $userSchedule->id)
+            ->whereHas('option', fn($q) => $q->where('is_correct', 1))
+            ->count();
+
+        $userSchedule->update([
+            'score' => $score,
+            'paper_status' => 'completed',
+            'submitted_at' => now(),
+        ]);
+    }
+
 }

@@ -3,7 +3,7 @@
     @include('admin.arch_widgets.alert_message')
     
     <x-admin.card>
-        @php $questions = Session::get('questions'); 
+        @php //$questions = Session::get('questions'); 
         // print "<pre>";  print_r($questions); print "</pre>";
         @endphp
        @foreach($questions as $qIndex => $question)
@@ -13,7 +13,7 @@
              style="display:none">
 
             <h4 class="mb-3">
-                {{ $qIndex + 1 }}. {{ $question->value }}
+                {{ $qIndex + 1 }}. &nbsp; &nbsp;  {{ $question->value }}
             </h4>
 
     <div class="options">

@@ -34,7 +34,7 @@
                         <li class="nav-item font-size-lg font-weight-bold">
                             <a href="{{url('admin/questions/view')}}" class="nav-link">
                                 <strong> <i class="nav-link-icon fa fa-user"> </i>
-                                {{ users_name(Session::get('schedule')->user->user_id)}}</strong>
+                                {{ users_name($userSchedule->user_id)}}</strong>
 
                             </a>
                         </li>
@@ -42,7 +42,7 @@
                         <li class="nav-item font-size-lg font-weight-bold">
                             <a href="{{url('admin/questions/view')}}" class="nav-link">
                                <strong>  <i class="nav-link-icon fa fa-book"> </i>
-                                {{Session::get('schedule')->subject->title}} - {{ ucwords(Session::get('schedule')->paper_type)}}</strong>
+                                {{$userSchedule->schedule->subject->title}} - {{ $userSchedule->schedule->paper_type}}</strong>
                             </a>
                         </li>  
                       

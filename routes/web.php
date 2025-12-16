@@ -227,7 +227,7 @@ Route::prefix('/portal')->namespace('App\Http\Controllers\Portal')->group(functi
          // exam schedules
          Route::get('exams','StudentController@examSchedules');
          Route::get('start-exam/{params?}','StudentController@start_exam');
-        Route::match(['get','post'],'examroom','StudentController@examroom');
+         Route::get('boardroom','StudentController@examroom');
           
       });
  });

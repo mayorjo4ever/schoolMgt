@@ -44,7 +44,12 @@
                         $paper_type = $schedule->paper_type;
                         $params = base64_encode("$user_id|$sched_id|$subj_id|$paper_type"); 
                      ?>
+                         @if($schedule->user->paper_status == 'normal')
                          <a href="{{url('student/start-exam/'.$params)}}" class="btn btn-success btn-md"  @if(empty($schedule['users'])) disabled="" @endif >Start  </a>
+                         @elseif($schedule->user->paper_status=='started')
+                         <a href="{{url('student/boardroom')}}" class="btn btn-warning btn-md"  @if(empty($schedule['users'])) disabled="" @endif >Resume  </a>
+                         @endif
+                         
                      </td> 
                   </tr>                 
                  @endforeach 

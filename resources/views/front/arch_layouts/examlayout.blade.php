@@ -46,30 +46,13 @@
       <script type="text/javascript" src="{{asset('template/arch/assets/scripts/sweetalert2.all.min.js')}}"></script>
       <script src="{{ url('front/js/notyf.min.js')}}"></script>
       <script type="text/javascript" src="{{asset('template/dist/js/custom.js')}}"></script>
-     
-      <script>
-                // Example starter JavaScript for disabling form submissions if there are invalid fields
-                (function() {
-                    'use strict';
-                    window.addEventListener('load', function() {
-                        // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                        var forms = document.getElementsByClassName('needs-validation');
-                        // Loop over them and prevent submission
-                        var validation = Array.prototype.filter.call(forms, function(form) {
-                            form.addEventListener('submit', function(event) {
-                                if (form.checkValidity() === false) {
-                                    event.preventDefault();
-                                    event.stopPropagation();
-                                }
-                                form.classList.add('was-validated');
-                            }, false);
-                        });
-                    }, false);
-                })();
-            </script>
-       
-            <script>
-                $(function () {
+      
+         
+    <script>
+                
+   
+         
+    $(function () {
 
                     let current = 1;
                     const total = $('.question').length;
@@ -101,7 +84,7 @@
                     }
 
                     function updateButtons() {
-                        $('#counter').text(`Question ${current} of ${total}`);
+                        $('#counter').text(`${current} of ${total}`);
                         $('#prevBtn').prop('disabled', current === 1);
                         $('#nextBtn').prop('disabled', current === total);
                     }
