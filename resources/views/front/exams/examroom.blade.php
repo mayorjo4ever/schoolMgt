@@ -4,7 +4,7 @@
     
     <x-admin.card>
         @php //$questions = Session::get('questions'); 
-        // print "<pre>";  print_r($questions); print "</pre>";
+         
         @endphp
        @foreach($questions as $qIndex => $question)
         <div class="question"
@@ -22,9 +22,15 @@
                 <input type="radio"
                        name="answer[{{ $question->id }}]"
                        value="{{ $option->id }}"
-                       class="option-input">
+                       class="option-input"
+                       
+                        @checked(
+                        isset($answers[$question->id]) &&
+                        $answers[$question->id] == $option->id
+                        )
+                       >
 
-                        {{ chr(65 + $oIndex) }}.
+                <strong>{{ chr(65 + $oIndex) }}.</strong>
                         {{ $option->value }}
                     </label>
                 @endforeach
@@ -40,4 +46,20 @@
             <button id="nextBtn" class="btn btn-primary btn-lg p-3" style="width:100px; ">Next</button>
         </div>
     </x-admin.card>
+     <x-admin.card>
+         <span class="font-weight-700">GO TO QUESTIONS </span>
+            <div id="question-palette" class="mb-3">
+                @foreach ($questions as $index => $question)
+                    <button
+                        type="button"
+                        class="btn btn-md palette-btn
+                            {{ isset($answers[$question->id]) ? 'btn-success' : 'btn-secondary' }}"
+                                    data-index="{{ $index + 1 }}"
+                                    data-question-id="{{ $question->id }}"
+                                >
+                                {{ $index + 1 }}
+                    </button>
+                @endforeach
+            </div>
+        </x-admin.card>
 @endsection 

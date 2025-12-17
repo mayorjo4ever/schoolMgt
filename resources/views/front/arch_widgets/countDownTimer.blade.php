@@ -16,7 +16,7 @@ span#days, span#hours, span#minutes, span#seconds {
 
 <script>
     //  var countDownDate = new Date(dateTo).getTime();
-     var countDownDate = new Date("{{$min}}").getTime();
+     var countDownDate = new Date("{{$userSchedule->ends_at}}").getTime();
         // Update the count down every 1 second
     var x = setInterval(function() {
 

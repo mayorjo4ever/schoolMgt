@@ -49,47 +49,84 @@
       
          
     <script>
-                
-   
-         
+               
     $(function () {
 
-                    let current = 1;
-                    const total = $('.question').length;
+        let current = 1;
+        const total = $('.question').length;
 
-                    // Hide all except first
-                    $('.question').hide();
-                    $('.question[data-index="1"]').show();
+        // Hide all except first
+        $('.question').hide();
+        $('.question[data-index="1"]').show();
 
-                    updateButtons();
+        updateButtons();
 
-                    $('#nextBtn').on('click', function () {
-                        if (current < total) {
-                            current++;
-                            showQuestion();
-                        }
-                    });
+        $('#nextBtn').on('click', function () {
+            if (current < total) {
+                current++;
+                showQuestion();
+            }
+        });
 
-                    $('#prevBtn').on('click', function () {
-                        if (current > 1) {
-                            current--;
-                            showQuestion();
-                        }
-                    });
+        $('#prevBtn').on('click', function () {
+            if (current > 1) {
+                current--;
+                showQuestion();
+            }
+        });
 
-                    function showQuestion() {
-                        $('.question').hide();
-                        $('.question[data-index="' + current + '"]').fadeIn(200);
-                        updateButtons();
-                    }
+        function showQuestion() {
+            $('.question').hide();
+            $('.question[data-index="' + current + '"]').fadeIn(200);
+            updateButtons();
+        }
 
-                    function updateButtons() {
-                        $('#counter').text(`${current} of ${total}`);
-                        $('#prevBtn').prop('disabled', current === 1);
-                        $('#nextBtn').prop('disabled', current === total);
-                    }
+        function updateButtons() {
+            $('#counter').text(`${current} of ${total}`);
+            $('#prevBtn').prop('disabled', current === 1);
+            $('#nextBtn').prop('disabled', current === total);
+        }
+        
+        
+        // best approach for saving answers
+        let answerBuffer = {};
+        let saveInProgress = false;
 
-                });
+        $('input[type=radio]').on('change', function () {
+            let qid = $(this).closest('.question').data('qid');
+            answerBuffer[qid] = $(this).val();
+            // undate pallete btns of answered questions
+            $(`.palette-btn[data-question-id="${qid}"]`)
+            .removeClass('btn-secondary')
+            .addClass('btn-success');
+        });
+
+        // Batch Auto-Save Every 20 Seconds
+        setInterval(function () {
+          if (Object.keys(answerBuffer).length === 0 || saveInProgress) return;
+            saveInProgress = true;      
+            $.ajax({  headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content') },
+            type:'post', url:'/student/save-answers',
+            data: { answers: answerBuffer },
+            success:function(resp){ 
+                 answerBuffer = {}; // clear buffer              
+            }, 
+            complete: function () {
+                saveInProgress = false;
+             }
+            });
+            }, 20000);
+            
+            
+            // question navigation buttons 
+            $('.palette-btn').on('click', function () {
+                let index = $(this).data('index');
+                current = index; 
+                showQuestion();                 
+            });
+
+
+    });
 </script>
 
    </body>

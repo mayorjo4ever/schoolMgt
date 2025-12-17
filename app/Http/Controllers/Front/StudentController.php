@@ -132,10 +132,8 @@ class StudentController extends Controller
         ->where('user_id', $user_id)
         ->where('paper_status', 'started')
         ->firstOrFail();
-      # print "<pre>";
-      # print_r($userSchedule->toarray()); die; 
-      // print_r($user_id); die; 
-       
+        # print "<pre>";# print_r($userSchedule->toarray()); die;  // print_r($user_id); die;
+             
         $questions = Question::with('options')
             ->whereIn(
                 'id',
@@ -147,7 +145,7 @@ class StudentController extends Controller
         $answers = Answer::where('users_schedule_id', $userSchedule->id)
             ->pluck('option_id', 'question_id');
         $min = Carbon::now()->addMinutes($userSchedule->minutes)->addSeconds(3); 
-      # print_r($questions->toarray()); 
+       # print_r($questions->toarray()); 
        # print_r($answers->toarray()); die;
         return view('front.exams.examroom', [
             'userSchedule' => $userSchedule,
@@ -156,6 +154,39 @@ class StudentController extends Controller
             'min'          => $min 
         ]);
         
+    }
+    
+    public function save_answers(Request $request) {
+        if($request->ajax()):
+        // print_r($request->all());
+        $user_id = Auth::guard('student')->user()->id;
+        $userSchedule = UsersSchedule::where('user_id', $user_id)
+        ->where('paper_status', 'started')
+        ->firstOrFail();
+
+        $payload = $request->answers;
+
+        $rows = [];
+
+        foreach ($payload as $questionId => $optionId) {
+            $rows[] = [
+                'user_id' => $user_id,
+                'users_schedule_id' => $userSchedule->id,
+                'question_id' => $questionId,
+                'option_id' => $optionId,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ];
+        }
+
+        Answer::upsert(
+            $rows,
+            ['user_id','users_schedule_id', 'question_id'], // unique keys
+            ['option_id', 'updated_at']
+        );
+
+        return response()->json(['status' => 'saved']);
+        endif;
     }
     
     public function submit(Request $request)
