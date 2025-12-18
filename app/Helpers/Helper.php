@@ -147,6 +147,11 @@ function saveAnswersAndGetScore(){
     $user = User::find($user_id);
     return $user->surname.',  '.$user->firstname.' '.$user->othername; 
 }
+ 
+function users_name_regno($user_id){
+    $user = User::find($user_id);
+    return $user->surname.',  '.$user->firstname.' '.$user->othername.' / '.$user->regno; 
+}
 
   function adminRoles($id, $toString = true){
         $admin = Admin::find($id);

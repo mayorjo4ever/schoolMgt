@@ -226,6 +226,8 @@ Route::prefix('/portal')->namespace('App\Http\Controllers\Portal')->group(functi
          
          // exam schedules
          Route::get('exams','StudentController@examSchedules');
+         Route::get('exams/{scheduleid}/review','StudentController@review');
+         Route::get('exams/result/pdf/{scheduleid}','StudentController@downloadResultPdf');
          Route::get('start-exam/{params?}','StudentController@start_exam');
          Route::get('boardroom','StudentController@examroom');
          Route::post('save-answers','StudentController@save_answers');

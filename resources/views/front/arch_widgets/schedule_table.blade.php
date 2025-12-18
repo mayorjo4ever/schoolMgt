@@ -47,7 +47,9 @@
                          @if($schedule->user->paper_status == 'normal')
                          <a href="{{url('student/start-exam/'.$params)}}" class="btn btn-success btn-md"  @if(empty($schedule['users'])) disabled="" @endif >Start  </a>
                          @elseif($schedule->user->paper_status=='started')
-                         <a href="{{url('student/boardroom')}}" class="btn btn-warning btn-md"  @if(empty($schedule['users'])) disabled="" @endif >Resume  </a>
+                         <a href="{{url('student/boardroom')}}" class="btn btn-primary btn-md"  @if(empty($schedule['users'])) disabled="" @endif >Resume  </a>                        
+                         @elseif($schedule->user->paper_status=='completed')
+                         <a target="_blank" href="{{url('student/exams/'.$schedule->user->id.'/review')}}" class="btn btn-primary btn-md" >View Result  </a>
                          @endif
                          
                      </td> 
