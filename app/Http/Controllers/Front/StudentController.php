@@ -5,17 +5,22 @@ namespace App\Http\Controllers\Front;
 use App\Http\Controllers\Controller;
 use App\Models\Answer;
 use App\Models\ExamQuestion;
+use App\Models\Option;
 use App\Models\Question;
 use App\Models\Schedule;
 use App\Models\UsersSchedule;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use function abort;
 use function greetings;
 use function now;
 use function redirect;
+use function response;
+use function url;
 use function view;
 
 class StudentController extends Controller
@@ -58,7 +63,7 @@ class StudentController extends Controller
        $schedules = Schedule::with(['user'=>function($query) use ($user_id) {
             $query->where('user_id',$user_id);
        }])->where('status',1)->get();
-//        print "<pre>"; 
+//       print "<pre>"; 
 //        print_r($schedules->toarray());  die;
        // user submiting schedule
       
@@ -145,13 +150,17 @@ class StudentController extends Controller
         $answers = Answer::where('users_schedule_id', $userSchedule->id)
             ->pluck('option_id', 'question_id');
         $min = Carbon::now()->addMinutes($userSchedule->minutes)->addSeconds(3); 
+        $lastAnsweredQuestionId = Answer::where('users_schedule_id', $userSchedule->id)
+            ->latest('updated_at')   // ← THIS is the trick
+            ->value('question_id');
        # print_r($questions->toarray()); 
        # print_r($answers->toarray()); die;
         return view('front.exams.examroom', [
             'userSchedule' => $userSchedule,
             'questions'    => $questions,
             'answers'      => $answers,
-            'min'          => $min 
+            'min'          => $min ,
+            'lastAnsweredQuestionId'=>$lastAnsweredQuestionId
         ]);
         
     }
@@ -189,21 +198,87 @@ class StudentController extends Controller
         endif;
     }
     
-    public function submit(Request $request)
+    public function submit_exam(Request $request)
     {
-        $userSchedule = UsersSchedule::findOrFail($request->users_schedule_id);
-
-        if ($userSchedule->paper_status === 'completed') return;
-
-        $score = Answer::where('users_schedule_id', $userSchedule->id)
-            ->whereHas('option', fn($q) => $q->where('is_correct', 1))
-            ->count();
-
-        $userSchedule->update([
-            'score' => $score,
-            'paper_status' => 'completed',
-            'submitted_at' => now(),
-        ]);
+        if($request->ajax()):            
+            $userSchedule = UsersSchedule::findOrFail($request->exam_id);            
+            # if ($userSchedule->paper_status === 'completed') return;
+            $answers = Answer::where('users_schedule_id', $userSchedule->id)->get();
+            $score = 0;    $maxScore = 0;
+            foreach ($answers as $answer) {
+                $isCorrect = Option::where('id', $answer->option_id)
+                    ->where('is_correct', 1)
+                    ->exists();
+                if ($isCorrect) {
+                    $score++;
+                }
+                $maxScore++;
+            }             
+            $userSchedule->update([
+                'score' => $score,
+                'max_score' => $maxScore,
+                'ends_at' => now(),
+                'submitted_at' => now(),
+                'paper_status' => 'completed' 
+             ]);
+            
+            Session::flash('success_message',"Exam Submitted Successfully");             
+            return response()->json([
+             'redirect' => url('student/exams')
+            ]);            
+        endif;                   
     }
+    
+    public function review(UsersSchedule $scheduleid) {
+        $page_info = ['title'=>'Exam Result ','icon'=>'pe-7s-user','sub-title'=>''];
+            // 🔒 Security check
+            if ($scheduleid->paper_status !== 'completed') {
+                abort(403, 'Exam not completed');
+            }
+
+            // Load questions with options
+            $questions = Question::with('options')
+                ->whereIn(
+                    'id',
+                    ExamQuestion::where('users_schedule_id', $scheduleid->id)
+                        ->pluck('question_id')
+                )
+                ->get();
+
+            // Student answers: question_id => option_id
+            $answers = Answer::where('users_schedule_id', $scheduleid->id)
+                ->pluck('option_id', 'question_id');
+
+            return view('front.exams.reviews', compact(
+                'scheduleid',
+                'questions',
+                'answers','page_info'
+            ));
+        }
+        
+    
+
+    public function downloadResultPdf($scheduleid) {
+        $userSchedule = UsersSchedule::with('schedule.user')->findOrFail($scheduleid);
+//         print "<pre>";
+//        print_r($userSchedule->toarray());  die; 
+        $questions = Question::with('options')
+            ->whereIn(
+                'id',
+                ExamQuestion::where('users_schedule_id', $userSchedule->id)
+                    ->pluck('question_id')
+            )->get();
+
+        $answers = Answer::where('users_schedule_id', $userSchedule->id)
+            ->pluck('option_id', 'question_id');
+
+        $pdf = Pdf::loadView(
+            'front.exams.result_pdf',
+            compact('userSchedule', 'questions', 'answers')
+        )->setPaper('A4', 'portrait');
+
+        return $pdf->download('exam-result.pdf');
+    }
+
 
 }
