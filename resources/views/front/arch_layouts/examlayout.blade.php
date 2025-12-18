@@ -49,17 +49,20 @@
       
          
     <script>
-               
+     window.lastAnsweredQuestionId = @json($lastAnsweredQuestionId);
+     
     $(function () {
-
         let current = 1;
-        const total = $('.question').length;
-
+        const total = $('.question').length;      
+        
+         if (lastAnsweredQuestionId > 0) {           
+            current = lastAnsweredQuestionId; 
+         }   
+         if(current > total ) {  current = total; }
+                
         // Hide all except first
-        $('.question').hide();
-        $('.question[data-index="1"]').show();
-
-        updateButtons();
+       showQuestion();
+      // updateButtons();
 
         $('#nextBtn').on('click', function () {
             if (current < total) {
@@ -124,7 +127,29 @@
                 current = index; 
                 showQuestion();                 
             });
-
+            
+            $('#submitExamBtn').on('click', function () {
+                if (!confirm('Are you sure you want to submit this exam?')) return;
+                submitExam(); 
+            });
+            
+            /** **/
+            function submitExam() {
+                var exam_id  = $('#exam_id').val(); 
+                $.ajax({ headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content') },
+                    url: "submit-exam", method: "POST",
+                    data: {
+                        exam_id:exam_id 
+                    },
+                    success: function (res) {
+                       // console.log(res);
+                        window.location.href = res.redirect;
+                    },
+                    error: function () {
+                        alert('Submission failed. Contact admin.');
+                    }
+                });
+            }
 
     });
 </script>

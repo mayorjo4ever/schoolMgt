@@ -36,7 +36,7 @@
                     @include('front.arch_widgets.countDownTimer')
                 </li>
                  <li class="mb-5 mt-5 pt-5">
-                     <button type="submit" class="btn btn-success btn-lg p-2 btn-block">Submit</button>
+                     <button type="submit" id="submitExamBtn" class="btn btn-success btn-lg p-3 btn-block">Submit</button>
                 </li>  
             </ul>
         </div>   

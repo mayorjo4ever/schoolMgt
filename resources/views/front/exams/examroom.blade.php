@@ -3,15 +3,13 @@
     @include('admin.arch_widgets.alert_message')
     
     <x-admin.card>
-        @php //$questions = Session::get('questions'); 
-         
-        @endphp
+        @php //$questions = Session::get('questions');  @endphp
+        <input type="hidden" id="exam_id" name="exam_id" value="{{$userSchedule->id}}" />
        @foreach($questions as $qIndex => $question)
         <div class="question"
              data-index="{{ $qIndex + 1 }}"
              data-qid="{{ $question->id }}"
              style="display:none">
-
             <h4 class="mb-3">
                 {{ $qIndex + 1 }}. &nbsp; &nbsp;  {{ $question->value }}
             </h4>

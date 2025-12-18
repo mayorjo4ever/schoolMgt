@@ -229,6 +229,7 @@ Route::prefix('/portal')->namespace('App\Http\Controllers\Portal')->group(functi
          Route::get('start-exam/{params?}','StudentController@start_exam');
          Route::get('boardroom','StudentController@examroom');
          Route::post('save-answers','StudentController@save_answers');
+         Route::post('submit-exam','StudentController@submit_exam');
           
       });
  });
