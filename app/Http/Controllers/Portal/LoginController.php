@@ -65,7 +65,7 @@ class LoginController extends Controller
                     return response()->json(['type'=>'success','url'=>$redirectTo,'message'=>"Login successful - redirecting..."]);
                }
                else if(Auth::guard('student')->attempt([$this->username=>$data['username'],'password'=>$data['password']])){
-                    $redirectTo = url('/student/dashboard');
+                    $redirectTo = url('/student/exams');
                     return response()->json(['type'=>'success','url'=>$redirectTo,'message'=>"Login successful - redirecting..."]);
                }
                 else {

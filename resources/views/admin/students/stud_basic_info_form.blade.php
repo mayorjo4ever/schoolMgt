@@ -7,7 +7,7 @@
     <div class="form-row mt-0">
        <div class="col-md-4 mb-3">
           <label for="title">Registration No.  </label>
-          <input type="text" readonly=""  value="{{$student['regno'] ?? ""}}" name="regno" id="user-regno" class="form-control bg-white" placeholder="Registration No " > 
+          <input type="text"  value="{{$student['regno'] ?? ""}}" name="regno" id="user-regno" class="form-control bg-white" placeholder="Registration No " > 
           <div class="invalid-feedback">
              Provide Your Registration No
           </div>

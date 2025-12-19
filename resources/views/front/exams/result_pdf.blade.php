@@ -1,4 +1,4 @@
-<?php use App\Models\Subject;?><!DOCTYPE html>
+<?php use App\Models\Subject; use Carbon\Carbon; ?><!DOCTYPE html>
 <html>
 <head>
     <style>
@@ -32,7 +32,7 @@
 <p><strong>Student:{{ users_name_regno($userSchedule->user_id)}} </strong> </p>
 <p class="capitalize"><strong>Subject:</strong> {{Subject::subjectName($userSchedule->schedule->subject_id) }} -  {{ $userSchedule->schedule->paper_type}}
  &nbsp; 
-| &nbsp; Time :  {{ $userSchedule->started_at}}  To  {{ $userSchedule->ends_at}}
+| &nbsp; Time :  {{ Carbon::parse($userSchedule->started_at)->toDateTimeString()}}  To  {{ Carbon::parse($userSchedule->ends_at)->toDateTimeString()}}
 </p>
 <p><strong>Score:</strong> {{ $userSchedule->score }} / {{ $userSchedule->max_score }}</p>
 

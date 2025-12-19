@@ -123,10 +123,8 @@ class StudentController extends Controller
                     'users_schedule_id' => $userSchedule->id,
                     'question_id' => $qid
                 ]);
-            } 
-            
-         return redirect('student/boardroom')
-        ->with('success_message', 'Your Paper Will Start Now');
+            }             
+         return redirect('student/boardroom');
     }
     
     public function examroom(Request $request){
@@ -201,10 +199,10 @@ class StudentController extends Controller
     public function submit_exam(Request $request)
     {
         if($request->ajax()):            
-            $userSchedule = UsersSchedule::findOrFail($request->exam_id);            
+            $userSchedule = UsersSchedule::with('schedule')->findOrFail($request->exam_id);            
             # if ($userSchedule->paper_status === 'completed') return;
             $answers = Answer::where('users_schedule_id', $userSchedule->id)->get();
-            $score = 0;    $maxScore = 0;
+            $score = 0;    $maxScore = $userSchedule->schedule->max_qtn; 
             foreach ($answers as $answer) {
                 $isCorrect = Option::where('id', $answer->option_id)
                     ->where('is_correct', 1)
@@ -212,7 +210,7 @@ class StudentController extends Controller
                 if ($isCorrect) {
                     $score++;
                 }
-                $maxScore++;
+                ## $maxScore++;
             }             
             $userSchedule->update([
                 'score' => $score,
